@@ -11,7 +11,7 @@ from questionSolver import iterateOverQuestions
 
 def main():
     driver: cwebdriver.WebDriver = webdriver.Chrome()
-    driver.get("https://www.wamap.org/assess2/?cid=41964&aid=2438851#/")
+    driver.get("https://www.wamap.org/assess2/?cid=41964&aid=2438852#/")
 
     driver.implicitly_wait(5)
 
@@ -23,21 +23,21 @@ def main():
         # wait for the login to go through
         sleep(1.5)
 
-        StartAssignment(driver)
+    StartAssignment(driver)
 
-        # wait for start to go through
-        sleep(1.5)
+    # wait for start to go through
+    sleep(1.5)
 
-        iterateOverQuestions(driver)
+    iterateOverQuestions(driver)
 
-        print("done!")
+    print("assignment completed.")
 
     driver.quit()
 
 
 def LoggedIn(driver: cwebdriver.WebDriver):
     try:
-        label = driver.find_element(By.CSS_SELECTOR, 'label[for="username"]')
+        driver.find_element(By.CSS_SELECTOR, 'label[for="username"]')
     except exceptions.NoSuchElementException:
         # login element doesn't exist, we are logged in already
         return True

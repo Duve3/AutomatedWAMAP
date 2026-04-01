@@ -1,8 +1,10 @@
+from time import sleep
 import selenium.webdriver as webdriver
 from selenium.webdriver.common.by import By
 import selenium.webdriver.chrome.webdriver as cwebdriver
 import selenium.common.exceptions as exceptions
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 
 from aiHandler import AiHandler
 
@@ -10,24 +12,28 @@ from aiHandler import AiHandler
 PROMPT = """
 Solve the following question. 
 give EACH required answer (according to the input's) only, do not show work, do not write any other text.
+Respond in LATEX format
+If a question requires more than one response, separate each response by semicolon
 """
 
 
 def iterateOverQuestions(driver: cwebdriver.WebDriver):
     ai = AiHandler()
 
-    # WARN: this actually goes to question 2 immediately, idk how to avoid
     while True:
+        sleep(2)
         if QuestionCompleted(driver):
-            continue
+            if NextQuestion(driver):
+                continue
+            return
 
         ScreenshotCurrentQuestion(driver)
 
-        print("Question screenshoted, asking AI")
+        print("Question screenshotted, asking AI")
 
         answers = ai.askQuestion("./question.png", PROMPT)
 
-        print(answers)
+        print("Answer: " + answers.text)
 
         if not NextQuestion(driver):
             return
@@ -36,11 +42,14 @@ def iterateOverQuestions(driver: cwebdriver.WebDriver):
 def QuestionCompleted(driver: cwebdriver.WebDriver):
     # questions are only considered completed if the div of scoreresult correct exists
     try:
-        driver.find_element(By.CSS_SELECTOR, 'div[class="scoreresult correct"][tabindex="-1"]')
+        label = driver.find_element(By.CSS_SELECTOR, 'div[class="scoreresult correct"]')
+
+        if label.text == "":
+            # just incase
+            return False
+        return True
     except exceptions.NoSuchElementException:
         return False
-
-    return True
 
 
 def ScreenshotCurrentQuestion(driver: cwebdriver.WebDriver):
