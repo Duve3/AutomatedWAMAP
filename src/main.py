@@ -6,12 +6,12 @@ import selenium.webdriver.chrome.webdriver as cwebdriver
 import selenium.common.exceptions as exceptions
 from selenium.webdriver.common.keys import Keys
 
-from questionSolver import iterateOverQuestions
+from questionSolver import QuestionSolver
 
 
 def main():
     driver: cwebdriver.WebDriver = webdriver.Chrome()
-    driver.get("https://www.wamap.org/assess2/?cid=41964&aid=2438852#/")
+    driver.get("https://www.wamap.org/assess2/?cid=41964&aid=2438853#/")
 
     driver.implicitly_wait(5)
 
@@ -28,7 +28,7 @@ def main():
     # wait for start to go through
     sleep(1.5)
 
-    iterateOverQuestions(driver)
+    QuestionSolver(driver).iterateOverQuestions()
 
     print("assignment completed.")
 

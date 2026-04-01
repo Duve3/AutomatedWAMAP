@@ -1,6 +1,7 @@
 from google import genai
 from PIL import Image
 
+
 class AiHandler:
     def __init__(self):
         with open("./login.env", "r") as f:

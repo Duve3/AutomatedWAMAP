@@ -8,7 +8,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from aiHandler import AiHandler
 
-
 PROMPT = """
 Solve the following question. 
 give EACH required answer (according to the input's) only, do not show work, do not write any other text.
@@ -17,51 +16,54 @@ If a question requires more than one response, separate each response by semicol
 """
 
 
-def iterateOverQuestions(driver: cwebdriver.WebDriver):
-    ai = AiHandler()
+class QuestionSolver:
+    def __init__(self, driver: cwebdriver.WebDriver):
+        self.ai = AiHandler()
+        self.driver: cwebdriver.WebDriver = driver
 
-    while True:
-        sleep(2)
-        if QuestionCompleted(driver):
-            if NextQuestion(driver):
-                continue
-            return
+        self.questionCount = 1
 
-        ScreenshotCurrentQuestion(driver)
+    def iterateOverQuestions(self):
+        while True:
+            sleep(2)
+            if self.QuestionCompleted():
+                if self.NextQuestion():
+                    continue
+                return
 
-        print("Question screenshotted, asking AI")
+            self.ScreenshotCurrentQuestion()
 
-        answers = ai.askQuestion("./question.png", PROMPT)
+            print(f"Question {self.questionCount} screenshotted, asking AI")
 
-        print("Answer: " + answers.text)
+            answers = self.ai.askQuestion("./question.png", PROMPT)
 
-        if not NextQuestion(driver):
-            return
+            print(f"QUESTION {self.questionCount} ANSWER: " + answers.text)
 
+            if not self.NextQuestion():
+                return
 
-def QuestionCompleted(driver: cwebdriver.WebDriver):
-    # questions are only considered completed if the div of scoreresult correct exists
-    try:
-        label = driver.find_element(By.CSS_SELECTOR, 'div[class="scoreresult correct"]')
+    def QuestionCompleted(self):
+        # questions are only considered completed if the div of scoreresult correct exists
+        try:
+            label = self.driver.find_element(By.CSS_SELECTOR, 'div[class="scoreresult correct"]')
 
-        if label.text == "":
-            # just incase
+            if label.text == "":
+                # just incase
+                return False
+            return True
+        except exceptions.NoSuchElementException:
             return False
-        return True
-    except exceptions.NoSuchElementException:
+
+    def ScreenshotCurrentQuestion(self):
+        div = self.driver.find_element(By.CSS_SELECTOR, 'div[class="home"]')
+        div.screenshot("./question.png")
+
+    def NextQuestion(self):
+        button = self.driver.find_element(By.CSS_SELECTOR, 'button[aria-label="Next"]')
+
+        if button.is_enabled():
+            button.click()
+            self.questionCount += 1
+            return True
+
         return False
-
-
-def ScreenshotCurrentQuestion(driver: cwebdriver.WebDriver):
-    div = driver.find_element(By.CSS_SELECTOR, 'div[class="home"]')
-    div.screenshot("./question.png")
-
-
-def NextQuestion(driver: cwebdriver.WebDriver):
-    button = driver.find_element(By.CSS_SELECTOR, 'button[aria-label="Next"]')
-
-    if button.is_enabled():
-        button.click()
-        return True
-
-    return False
