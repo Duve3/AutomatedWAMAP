@@ -1,4 +1,6 @@
 from google import genai
+from google.genai import errors
+import time
 from PIL import Image
 
 
@@ -13,9 +15,24 @@ class AiHandler:
     def askQuestion(self, screenshotPath, text: str):
         image = Image.open(screenshotPath)
 
-        response = self.client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[image, text]
-        )
+        # really love python and its amazing "do while" implementation :heart:
+        highDemand = True
+
+        while highDemand:
+            try:
+                print("Sending gemini request...")
+
+                response = self.client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=[image, text]
+                )
+                highDemand = False
+            except errors.APIError as err:
+                highDemand = True
+                print("High demand, waiting 30-60s and retrying...")
+
+                # debug
+                print(err.message)
+                time.sleep(60)
 
         return response
